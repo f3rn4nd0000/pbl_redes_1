@@ -16,6 +16,7 @@ Content-Length: {}
 {}
 '''
 my_udp_server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+my_udp_server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1) 
 my_udp_server.bind(UDP_ADDRESS)
 
 my_tcp_server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -30,15 +31,24 @@ tcp_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # tcp_client_socket.bind(TCP_ADDRESS)
 
 packets_received = []
-high_consumption_value = 100
+colecao_packets = {}
 
 def handle_udp():
-    print(f"Iniciando servidor UDP")
-    while True:
         data, addr = my_udp_server.recvfrom(BUFFERSIZE)
+        print((data, addr))
         print(f"Recebendo dados do dispositivo: {addr}")
-        print(f"Dados = {data}")
+        print(f"Dados = {data.decode('utf-8')}")
         packets_received.append(data.decode('utf-8'))
+        # if ('packets_received from: '+get_device_id(data)) in payload:
+        #     print('ATUALIZANDO')
+        #     payload.update({'packets_received from: '+get_device_id(data): data.decode('utf-8')})
+        # else:
+            # print('APENAS INSERINDO')
+        print('atualizando')
+        colecao_packets[get_device_id(data)] = data.decode('utf-8')
+        print('>>>>>>>>>>>>>colecao de packets<<<<<<<<<<<<<')
+        print(colecao_packets)
+        print(data.decode('utf-8'))
         return data.decode('utf-8')
     
 def get_consumption_rate(udp_data):
@@ -71,24 +81,17 @@ def generate_bill():
     """
     if (int(get_total_consumption(packets_received[len(packets_received)-1])) - int(get_total_consumption(packets_received[0])) > 100):
         message = alert
-
     return message
 
-def handle_tcp():
+def handle_tcp(conn, addr):
     print(f"Iniciando servidor TCP na porta {TCP_PORT}")
     while True:
         udp_data = handle_udp()
-        message = f"""
-        consumo instantaneo (KWh): {get_consumption_rate(udp_data)}
-        consumo total (KW): {get_total_consumption(udp_data)}
-        data e horario: {get_day_time(udp_data)}
-        """
         num_contrato = get_device_id(udp_data)
         print('NUM. DO CONTRATO')
         print(num_contrato)
         print('dados recebidos do dispositivo UDP:')
         print(udp_data)
-        conn, addr = my_tcp_server.accept()
         request = conn.recv(BUFFERSIZE)
         print('param do REQUEST')
         print(get_request_param(request))
@@ -104,15 +107,28 @@ def handle_tcp():
         print(addr)
         print('-----')
         print(request)
-        if (tcp_user_id == num_contrato):
-            # conn.send(HTTP_RESPONSE.format(len(message), message).encode('utf-8'))
-            if url_path.endswith('/fatura'):
-                print('ENTREI NO IF DE URL PATH')
-                message = generate_bill()
-            conn.send(HTTP_RESPONSE.format(len(message), message).encode('utf-8'))
-        else:
-            message = 'Esse usuario nao foi encontrado!!!'
-            conn.send(HTTP_RESPONSE.format(len(message), message).encode('utf-8'))
+        print('*******str(num_contrato)*******')
+        print(str(num_contrato))
+        if str(num_contrato) in colecao_packets.keys():
+            if (tcp_user_id == num_contrato):
+                if url_path.endswith('/fatura'):
+                    print('ENTREI NO IF DE URL PATH')
+                    message = generate_bill()
+                    conn.send(HTTP_RESPONSE.format(len(message), message).encode('utf-8'))
+                elif (url_path == '/'):
+                    message = handle_udp()
+                    conn.send(HTTP_RESPONSE.format(len(message), message).encode('utf-8'))
+                else:
+                    message = f"""
+                    id do dispositivo: {get_device_id(udp_data)}
+                    consumo instantaneo (KWh): {get_consumption_rate(udp_data)}
+                    consumo total (KW): {get_total_consumption(udp_data)}
+                    data e horario: {get_day_time(udp_data)}
+                    """
+                    conn.send(HTTP_RESPONSE.format(len(message), message).encode('utf-8'))
+            else:
+                message = 'Esse dispositivo nao esta registrado no momento!!!'
+                conn.send(HTTP_RESPONSE.format(len(message), message).encode('utf-8'))
 
 if __name__ == "__main__":
     # handle_tcp()
@@ -120,5 +136,11 @@ if __name__ == "__main__":
     # receive_udp_thread = threading.Thread(target = handle_udp)
     # receive_udp_thread.start()
 
-    send_tcp_thread = threading.Thread(target = handle_tcp)
-    send_tcp_thread.start()
+    # send_tcp_thread = threading.Thread(target = handle_tcp)
+    while True:
+        try:
+            tcp_conn, tcp_client = my_tcp_server.accept()
+            thread_tcp = threading.Thread(target = handle_tcp, args=(tcp_conn, tcp_client))
+            thread_tcp.start()
+        except Exception as e:
+            print("Erro ao tentar conexao. Causa: ", e.args)  
