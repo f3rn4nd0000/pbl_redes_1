@@ -1,0 +1,11 @@
+FROM ubuntu:20.04
+
+RUN apt-get -y update && apt-get -y install python3
+RUN mkdir /home/app
+
+EXPOSE 20001
+
+COPY . /home/app
+WORKDIR /home/app
+CMD ["/bin/bash"]
+# Dockerfile do dispositivo udp

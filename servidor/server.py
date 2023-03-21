@@ -2,7 +2,7 @@ import socket
 import threading
 import json
 
-HOST_ADDRESS = "127.0.0.1"
+HOST_ADDRESS = "0.0.0.0"
 UDP_PORT     = 20001
 TCP_PORT     = 20004
 UDP_ADDRESS  = (HOST_ADDRESS,UDP_PORT)

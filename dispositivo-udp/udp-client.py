@@ -7,7 +7,7 @@ import json
 import random
 from datetime import datetime
 
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 PORT = 20001
 
 msgFromClient       = "Hello UDP Server"
