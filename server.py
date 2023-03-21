@@ -30,6 +30,7 @@ tcp_client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # tcp_client_socket.bind(TCP_ADDRESS)
 
 packets_received = []
+high_consumption_value = 100
 
 def handle_udp():
     print(f"Iniciando servidor UDP")
@@ -59,13 +60,19 @@ def get_request_param(request):
 
 def generate_bill():
     message = f"""
-        FATURA CORRESPONDENTE AO PERIODO DE \n{get_day_time(packets_received[0])}\nA \n{get_day_time(packets_received[len(packets_received)-1])}
-        VALOR DA FATURA = R$ {int(get_total_consumption(packets_received[len(packets_received)-1])) - int(get_total_consumption(packets_received[0]))}
+    FATURA CORRESPONDENTE AO PERIODO DE \n{get_day_time(packets_received[0])}\nA \n{get_day_time(packets_received[len(packets_received)-1])}
+    VALOR DA FATURA = R$ {int(get_total_consumption(packets_received[len(packets_received)-1])) - int(get_total_consumption(packets_received[0]))}
     """
-    return message
+    alert = f"""
+    ATENCAO, VOCE EXCEDEU A COTA MENSAL DE CONSUMO TOTAL DE 100KW
 
-# def parse_tcp_request(request):
-#     return (str(request.split('GET /')[1]).split(' HTTP/1.1')[0])
+    FATURA CORRESPONDENTE AO PERIODO DE \n{get_day_time(packets_received[0])}\nA \n{get_day_time(packets_received[len(packets_received)-1])}
+    VALOR DA FATURA = R$ {int(get_total_consumption(packets_received[len(packets_received)-1])) - int(get_total_consumption(packets_received[0]))}
+    """
+    if (int(get_total_consumption(packets_received[len(packets_received)-1])) - int(get_total_consumption(packets_received[0])) > 100):
+        message = alert
+
+    return message
 
 def handle_tcp():
     print(f"Iniciando servidor TCP na porta {TCP_PORT}")
