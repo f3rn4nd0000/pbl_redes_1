@@ -48,16 +48,21 @@ Para rodar o dispositivo UDP:
 ```
 python dispositivo-udp/udp-client.py
 ```
+Lembre-se de modificar o IP no código, pois o IP do servidor foi definido em código (hardcoded) como o endereço do Larsid 06
 
-Será gerado um [UUID](https://docs.python.org/3/library/uuid.html)
+
+No momento da inicialização do dispositivo UDP será gerado um [UUID](https://docs.python.org/3/library/uuid.html) e com base nele serão feitas as requisições para os respectivos dispositivos com aquele UUID
 
 
 No portainer foram definidos os seguintes ambientes:
-​ Larsid 06 (servidor)
-​ Larsid 02 e 03 (clientes UDP)
+​ Larsid 06 (servidor) 
+​ Larsid 02 e 03 (clientes UDP) 
 
 Foram definidas as portas:
-
+```
+20001 para UDP
+20004 para TCP
+```
 
 O programa contém dois endpoints que poderão receber 
 requisições HTTP pelo Insomnia, que são as seguintes:
@@ -66,7 +71,7 @@ Requisição para endpoint <uuid>
 ```
 GET http://172.16.103.6:20004/<uuid>
 ```
-Exemplo de resposta(s) para requisição acima:
+Exemplo de resposta para requisição acima:
 
 ```
 
@@ -81,7 +86,7 @@ Requisição para endpoint <uuid>/fatura
 ```
 GET http://172.16.103.6:20004/<uuid>/fatura
 ```
-Respostas para requisição acima:
+Exemplo de resposta para requisição acima:
 ```
     FATURA CORRESPONDENTE AO PERIODO DE 
 dia:03/21/23 horario:20:31:58
