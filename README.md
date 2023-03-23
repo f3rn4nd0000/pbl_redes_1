@@ -17,18 +17,17 @@ solução do problema. Neste caso, apenas os mecanismos básicos presentes no si
 acessiveis pelas bibliotecas nativas da linguagem de programação podem ser usados para implementar a
 comunicação sobre uma arquitetura de rede baseada no padrão da Internet.
 
-Ambiente de desenvolvimento
-    ​ Sistema operacional: Windows 10 e 11;      
-    ​ Linguagem de programação: Python 3.10.4;
+Ambiente de desenvolvimento:
+
+    ​ Sistema operacional: Arch Linux
+    
+    ​ Linguagem de programação: Python 3.10.4
+    
     ​ Bibliotecas nativas utilizadas:
-        json;
-        random;
-        select;
-        socket;
-        string;
-        sys;
-        threading;
-        tkinter;
+        - socket
+        - json
+        - threading
+        - uuid
 
 ### Testando a aplicação:
 * * *
@@ -99,11 +98,4 @@ Para ambas requisições acima podemos ainda receber uma resposta do tipo:
 ```
 Esse dispositivo nao esta registrado no momento!!!
 ```
-
-Bibliotecas nativas usadas:
-* * *
-socket
-json
-uuid
-threading
 
